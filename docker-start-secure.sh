@@ -85,13 +85,13 @@ case $choice in
         echo ""
         echo "🚀 Starting development server..."
         echo "=================================="
-        docker-compose up app-dev
+        docker compose up app-dev
         ;;
     2)
         echo ""
         echo "🏭 Building and starting production server..."
         echo "============================================="
-        docker-compose up --build app
+        docker compose up --build app
         ;;
     *)
         echo "❌ Invalid choice. Please run the script again."

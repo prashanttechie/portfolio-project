@@ -13,9 +13,9 @@
     "create-admin": "ts-node scripts/create-admin.ts",
     "docker:dev": "./docker-start-secure.sh",
     "docker:prod": "./docker-start-secure.sh",
-    "docker:build": "docker-compose build",
-    "docker:stop": "docker-compose down",
-    "docker:clean": "docker-compose down -v && docker system prune -f"
+    "docker:build": "docker compose build",
+    "docker:stop": "docker compose down",
+    "docker:clean": "docker compose down -v && docker system prune -f"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
