@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Portfolio Website - Secure Docker Start Script
-# Prompts for database password before starting
+# Prompts for database host and password before starting
 
 set -e
 
@@ -21,7 +21,7 @@ if [ ! -f .env ]; then
     echo "📝 Creating .env file from template..."
     cp .env.example .env 2>/dev/null || cat > .env << 'EOF'
 # Database Configuration
-DB_HOST=210.79.129.8
+DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=portfolio-data
 DB_USER=postgres
@@ -32,14 +32,19 @@ NODE_ENV=development
 EOF
 fi
 
-# Prompt for password
+# Prompt for database connection details
 echo "🔐 Database Connection Setup"
 echo "----------------------------"
-echo "Host: 210.79.129.8"
-echo "Database: portfolio-data"
-echo "User: postgres"
 echo ""
+
+# Prompt for host
+read -p "Enter database host (default: localhost): " DB_HOST_INPUT
+DB_HOST=${DB_HOST_INPUT:-localhost}
+echo ""
+
+# Prompt for password
 read -sp "Enter PostgreSQL password: " DB_PASSWORD
+echo ""
 echo ""
 
 # Validate password is not empty
@@ -48,16 +53,25 @@ if [ -z "$DB_PASSWORD" ]; then
     exit 1
 fi
 
-# Update .env file with password
+# Display configuration
+echo "Configuration:"
+echo "  Host: $DB_HOST"
+echo "  Port: 5432"
+echo "  Database: portfolio-data"
+echo "  User: postgres"
+echo ""
+
+# Update .env file with host and password
 echo "📝 Updating .env file..."
+sed -i.bak "s/DB_HOST=.*/DB_HOST=$DB_HOST/" .env
 sed -i.bak "s/DB_PASSWORD=.*/DB_PASSWORD=$DB_PASSWORD/" .env
 rm -f .env.bak
 
 # Also update .env.local for local development
-echo "DATABASE_URL=\"postgresql://postgres:${DB_PASSWORD}@210.79.129.8:5432/portfolio-data?connect_timeout=10&sslmode=prefer\"" > .env.local
+echo "DATABASE_URL=\"postgresql://postgres:${DB_PASSWORD}@${DB_HOST}:5432/portfolio-data?connect_timeout=10&sslmode=prefer\"" > .env.local
 
 echo ""
-echo "✅ Password configured successfully!"
+echo "✅ Database configuration saved successfully!"
 echo ""
 
 # Ask user which mode to run

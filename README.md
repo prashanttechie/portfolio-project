@@ -1,4 +1,4 @@
-# Portfolio Website - Prashant Kumar Mishra
+# Portfolio Website
 
 A modern, responsive portfolio website built with Next.js 15, React 19, TypeScript, and Tailwind CSS.
 
@@ -24,6 +24,7 @@ A modern, responsive portfolio website built with Next.js 15, React 19, TypeScri
 - **UI Library**: React 19
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS 3
+- **Database**: PostgreSQL with Prisma ORM
 - **Rich Text Editor**: TipTap
 - **Icons**: Lucide React
 - **Form Validation**: React Hook Form + Zod
@@ -33,6 +34,7 @@ A modern, responsive portfolio website built with Next.js 15, React 19, TypeScri
 ### Option 1: Local Development
 - Node.js 18+ installed
 - npm or yarn package manager
+- PostgreSQL database (optional, for full features)
 
 ### Option 2: Docker (Recommended)
 - Docker Desktop installed ([Download here](https://www.docker.com/products/docker-desktop))
@@ -42,17 +44,13 @@ A modern, responsive portfolio website built with Next.js 15, React 19, TypeScri
 
 ### Option A: Run with Docker (Recommended) 🐳
 
-**Quick Start with Secure Password:**
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd portfolio-website
+cd portfolio-project
 
-# Start development server (will prompt for password)
+# Start development server (will prompt for database password)
 npm run docker:dev
-
-# When prompted, enter PostgreSQL password:
-# 🔐 Enter PostgreSQL password: ********
 
 # OR start production server
 npm run docker:prod
@@ -69,10 +67,8 @@ npm run docker:stop     # Stop all containers
 npm run docker:clean    # Stop containers and clean up
 ```
 
-📖 **Full documentation:**
-- [DOCKER_GUIDE.md](./DOCKER_GUIDE.md) - Complete Docker guide
-- [SECURE_SETUP.md](./SECURE_SETUP.md) - Secure password handling
-- [DATABASE_SETUP.md](./DATABASE_SETUP.md) - Database configuration
+📖 **Docker Documentation:**
+See docker-compose.yml and Dockerfile for configuration details.
 
 ---
 
@@ -81,7 +77,7 @@ npm run docker:clean    # Stop containers and clean up
 1. **Clone the repository**:
    ```bash
    git clone <repository-url>
-   cd portfolio-website
+   cd portfolio-project
    ```
 
 2. **Install dependencies**:
@@ -89,26 +85,35 @@ npm run docker:clean    # Stop containers and clean up
    npm install
    ```
 
-3. **Run the development server**:
+3. **Set up environment variables**:
+   ```bash
+   # Create .env.local file
+   echo 'DATABASE_URL="postgresql://user:password@localhost:5432/dbname"' > .env.local
+   ```
+
+4. **Generate Prisma client**:
+   ```bash
+   npm run db:generate
+   ```
+
+5. **Run the development server**:
    ```bash
    npm run dev
    ```
 
-4. **Open your browser**:
+6. **Open your browser**:
    Navigate to [http://localhost:3000](http://localhost:3000)
 
 ## 📁 Project Structure
 
 ```
-portfolio-website/
+portfolio-project/
 ├── src/
 │   ├── app/                    # Next.js App Router pages
 │   │   ├── admin/             # Admin dashboard
+│   │   ├── api/               # API routes
 │   │   ├── blog/              # Blog pages
-│   │   │   ├── [id]/         # Individual blog post
-│   │   │   └── write/        # Write new blog post
 │   │   ├── courses/           # Course pages
-│   │   │   └── [id]/         # Individual course detail
 │   │   ├── projects/          # Projects showcase
 │   │   ├── layout.tsx         # Root layout
 │   │   ├── page.tsx           # Home page
@@ -116,17 +121,22 @@ portfolio-website/
 │   ├── components/            # React components
 │   │   ├── Navigation.tsx     # Navigation bar
 │   │   ├── Footer.tsx         # Footer component
-│   │   └── RichTextEditor.tsx # TipTap editor
+│   │   ├── RichTextEditor.tsx # TipTap editor
+│   │   └── VisitorTracker.tsx # Analytics tracker
 │   └── lib/                   # Utility functions
-│       ├── storage.ts         # LocalStorage utilities
-│       └── config.ts          # App configuration
+│       ├── storage.ts         # Storage utilities
+│       ├── config.ts          # App configuration
+│       └── db.ts              # Database client
+├── prisma/                    # Prisma schema and migrations
+│   └── schema.prisma          # Database schema
 ├── public/                    # Static assets
-│   ├── portfolio.jpeg        # Profile image
-│   └── resume.pdf           # Resume file
-├── package.json              # Dependencies
-├── tsconfig.json            # TypeScript config
-├── tailwind.config.js       # Tailwind CSS config
-└── next.config.ts          # Next.js config
+├── docker-compose.yml         # Docker orchestration
+├── Dockerfile                 # Production Docker image
+├── Dockerfile.dev             # Development Docker image
+├── package.json               # Dependencies
+├── tsconfig.json             # TypeScript config
+├── tailwind.config.js        # Tailwind CSS config
+└── next.config.ts           # Next.js config
 ```
 
 ## 🎨 Customization
@@ -134,9 +144,16 @@ portfolio-website/
 ### Update Personal Information
 
 1. **Edit `src/app/page.tsx`**: Update your name, bio, skills, and contact information
-2. **Replace `public/portfolio.jpeg`**: Add your own profile photo
-3. **Replace `public/resume.pdf`**: Add your resume
-4. **Edit `src/components/Footer.tsx`**: Update footer links and information
+2. **Edit `src/components/Navigation.tsx`**: Update navigation name
+3. **Edit `src/components/Footer.tsx`**: Update footer information
+4. **Replace `public/portfolio.jpeg`**: Add your own profile photo
+5. **Replace `public/resume.pdf`**: Add your resume
+
+### Configure Database
+
+1. Update `.env` or `.env.local` with your database credentials
+2. Run `npm run db:push` to sync the schema
+3. Use `npm run db:studio` to manage data with Prisma Studio
 
 ### Add Projects
 
@@ -151,15 +168,14 @@ Edit `src/app/projects/page.tsx` to add your projects with:
 1. Navigate to `/blog/write` in the application
 2. Use the rich text editor to create content
 3. Add title, excerpt, category, and tags
-4. Publish the post (stored in localStorage)
+4. Publish the post
 
 ### Add Courses
 
-Edit `src/app/courses/page.tsx` to add or modify courses:
-- Course title and description
-- Price and duration
-- Learning outcomes
-- Curriculum
+1. Navigate to `/courses/create` in the application
+2. Fill in course details
+3. Add curriculum items
+4. Publish the course
 
 ## 🔧 Available Scripts
 
@@ -167,29 +183,17 @@ Edit `src/app/courses/page.tsx` to add or modify courses:
 - `npm run build` - Build for production
 - `npm run start` - Start production server
 - `npm run lint` - Run ESLint
+- `npm run db:generate` - Generate Prisma client
+- `npm run db:push` - Push schema changes to database
+- `npm run db:studio` - Open Prisma Studio (database GUI)
 
-## 🎯 Features in Detail
+## 🐳 Docker Commands
 
-### Navigation
-- Smooth scrolling to sections on home page
-- Responsive mobile menu
-- Active link highlighting
-
-### Blog System
-- Rich text editor with formatting options
-- Category and tag filtering
-- Read time estimation
-- Responsive design
-
-### Course Catalog
-- Featured courses section
-- Category filtering
-- Detailed course pages with curriculum
-- Contact-based enrollment
-
-### Admin Dashboard
-- Simple statistics overview
-- Content management interface
+- `npm run docker:dev` - Start development with Docker
+- `npm run docker:prod` - Start production with Docker
+- `npm run docker:build` - Build Docker images
+- `npm run docker:stop` - Stop all containers
+- `npm run docker:clean` - Stop and clean up containers
 
 ## 📱 Responsive Design
 
@@ -205,7 +209,8 @@ The website is fully responsive and optimized for:
 
 1. Push your code to GitHub
 2. Import the project in [Vercel](https://vercel.com)
-3. Deploy automatically
+3. Add environment variables (DATABASE_URL)
+4. Deploy automatically
 
 ### Deploy to Netlify
 
@@ -214,34 +219,68 @@ The website is fully responsive and optimized for:
 3. Configure build settings:
    - Build command: `npm run build`
    - Publish directory: `.next`
+4. Add environment variables
 
-## 📝 Data Storage
+### Deploy with Docker
 
-Currently, the application uses **localStorage** for:
-- Blog posts
-- Course enrollments (if added)
-- User preferences
+1. Build the production image:
+   ```bash
+   docker build -t portfolio-app:latest .
+   ```
 
-For production use with multiple users, consider integrating:
-- A database (PostgreSQL, MongoDB)
-- A CMS (Contentful, Sanity)
-- A backend API
+2. Run the container:
+   ```bash
+   docker run -d -p 3000:3000 -e DATABASE_URL="your_db_url" portfolio-app:latest
+   ```
 
-## 🤝 Contributing
+## 🔒 Security
 
-Feel free to fork this repository and customize it for your own portfolio!
+- Environment variables are used for sensitive data
+- `.env` and `.env.local` files are gitignored
+- Database credentials are never committed to version control
+- Use strong passwords for production databases
+- Enable SSL for production database connections
+
+## 📝 Database Schema
+
+The application uses PostgreSQL with the following main tables:
+- `BlogPost` - Blog posts with content and metadata
+- `Course` - Course catalog with details
+- `CourseCurriculum` - Course modules and lessons
+- `CourseEnrollment` - Student enrollments
+- `ContactSubmission` - Contact form submissions
+- `Analytics` - Visitor tracking and analytics
+- `User` - Admin users for authentication
+
+## 🐛 Troubleshooting
+
+### Port 3000 already in use
+```bash
+# Find and kill the process
+lsof -ti:3000 | xargs kill -9
+```
+
+### Prisma client not found
+```bash
+npm run db:generate
+```
+
+### Database connection failed
+- Check DATABASE_URL in `.env.local`
+- Verify database is running
+- Check firewall settings
+
+### Docker build fails
+```bash
+# Clean rebuild
+npm run docker:clean
+docker system prune -a
+npm run docker:build
+```
 
 ## 📄 License
 
 This project is open source and available under the MIT License.
-
-## 👤 Author
-
-**Prashant Kumar Mishra**
-- Email: prshntmishra033@gmail.com
-- Phone: +91-9899683318
-- LinkedIn: [prashantkm](https://www.linkedin.com/in/prashantkm/)
-- GitHub: [prashantkmishra](https://github.com/prashantkmishra)
 
 ## 🙏 Acknowledgments
 
