@@ -58,7 +58,7 @@ export default function Projects() {
             My Projects
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Here are some of the projects I've worked on. Each project represents 
+            Here are some of the projects I&apos;ve worked on. Each project represents 
             a unique challenge and showcases different aspects of my development skills.
           </p>
         </div>
@@ -145,7 +145,7 @@ export default function Projects() {
             Interested in Working Together?
           </h2>
           <p className="text-gray-600 mb-8">
-            I'm always open to discussing new opportunities and exciting projects.
+            I&apos;m always open to discussing new opportunities and exciting projects.
           </p>
           <Link
             href="/#contact"

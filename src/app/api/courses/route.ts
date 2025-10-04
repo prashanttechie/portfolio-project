@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
         image: image || null,
         featured: featured || false,
         curriculum: {
-          create: curriculum?.map((item: any, index: number) => ({
+          create: curriculum?.map((item: { title: string; duration: string }, index: number) => ({
             title: item.title,
             duration: item.duration,
             order: index + 1,

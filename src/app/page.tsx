@@ -45,7 +45,7 @@ export default function Home() {
             </div>
             
             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Hi, I'm <span className="text-blue-600">Prashant Kumar Mishra</span>
+              Hi, I&apos;m <span className="text-blue-600">Prashant Kumar Mishra</span>
             </h1>
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto">
               Software Developer passionate about creating innovative solutions and building scalable applications
@@ -78,7 +78,7 @@ export default function Home() {
                 About Me
               </h2>
               <p className="text-lg text-gray-600 mb-6">
-                I'm a passionate software developer with expertise in full-stack development. 
+                I&apos;m a passionate software developer with expertise in full-stack development. 
                 I enjoy creating innovative solutions and building scalable applications that 
                 make a difference.
               </p>
@@ -116,7 +116,7 @@ export default function Home() {
                 </div>
               </div>
               
-              <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Let's Connect</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">Let&apos;s Connect</h3>
               <div className="space-y-4">
                 <a
                   href="mailto:prshntmishra033@gmail.com"
@@ -160,11 +160,11 @@ export default function Home() {
       <section id="contact" className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-            Let's Work Together
+            Let&apos;s Work Together
           </h2>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            I'm always interested in new opportunities and exciting projects. 
-            Let's discuss how we can bring your ideas to life.
+            I&apos;m always interested in new opportunities and exciting projects. 
+            Let&apos;s discuss how we can bring your ideas to life.
           </p>
           <a
             href="mailto:prshntmishra033@gmail.com"

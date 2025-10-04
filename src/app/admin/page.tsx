@@ -73,7 +73,7 @@ export default function AdminPage() {
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const [visitorStats, setVisitorStats] = useState<VisitorStats | null>(null);
   
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'dashboard' | 'blogs' | 'courses' | 'projects' | 'users' | 'visitors'>('dashboard');
 
   // User management modal
@@ -83,6 +83,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     checkAuth();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkAuth = async () => {
@@ -117,7 +118,7 @@ export default function AdminPage() {
         const data = await response.json();
         setLoginError(data.error || 'Login failed');
       }
-    } catch (error) {
+    } catch {
       setLoginError('Login failed. Please try again.');
     }
   };
@@ -434,7 +435,7 @@ export default function AdminPage() {
               {['dashboard', 'blogs', 'courses', 'projects', 'users', 'visitors'].map((tab) => (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab as any)}
+                  onClick={() => setActiveTab(tab as 'dashboard' | 'blogs' | 'courses' | 'projects' | 'users' | 'visitors')}
                   className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
                     activeTab === tab
                       ? 'border-blue-600 text-blue-600'

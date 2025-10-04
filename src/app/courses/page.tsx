@@ -23,6 +23,7 @@ export default function Courses() {
 
   useEffect(() => {
     fetchCourses();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategory]);
 
   const fetchCourses = async () => {

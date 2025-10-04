@@ -63,3 +63,4 @@ scripts/*.js
 *.tmp
 *.temp
 .cache/
+ssh-secret
