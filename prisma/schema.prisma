@@ -1,0 +1,167 @@
+// Prisma Schema for Portfolio Website with External PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Blog Posts
+model BlogPost {
+  id          Int      @id @default(autoincrement())
+  title       String
+  content     String
+  excerpt     String?
+  author      String   @default("Prashant Kumar Mishra")
+  publishedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  readTime    String   @default("5 min read")
+  category    String
+  tags        String[]
+  published   Boolean  @default(true)
+  slug        String   @unique
+  
+  @@map("blog_posts")
+}
+
+// Courses
+model Course {
+  id          Int      @id @default(autoincrement())
+  title       String   @unique
+  description String
+  price       Float
+  duration    String
+  level       String
+  category    String
+  instructor  String   @default("Prashant Kumar Mishra")
+  image       String?
+  featured    Boolean  @default(false)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Course curriculum
+  curriculum  CourseCurriculum[]
+  
+  // Course enrollments
+  enrollments CourseEnrollment[]
+  
+  @@map("courses")
+}
+
+// Course Curriculum
+model CourseCurriculum {
+  id       Int    @id @default(autoincrement())
+  courseId Int
+  title    String
+  duration String
+  order    Int
+  
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  @@map("course_curriculum")
+}
+
+// Course Enrollments
+model CourseEnrollment {
+  id              Int           @id @default(autoincrement())
+  courseId        Int
+  name            String
+  email           String
+  phone           String?
+  experience      String?
+  motivation      String?
+  paymentStatus   PaymentStatus @default(PENDING)
+  paymentIntentId String?       @unique
+  enrolledAt      DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  @@map("course_enrollments")
+}
+
+// Payment Status Enum
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+// Contact Form Submissions
+model ContactSubmission {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  subject   String?
+  message   String
+  createdAt DateTime @default(now())
+  responded Boolean  @default(false)
+  
+  @@map("contact_submissions")
+}
+
+// Projects
+model Project {
+  id           Int      @id @default(autoincrement())
+  title        String
+  description  String
+  technologies String[]
+  githubUrl    String?
+  liveUrl      String?
+  imageUrl     String?
+  featured     Boolean  @default(false)
+  published    Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@map("projects")
+}
+
+// Admin Users
+model AdminUser {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String   // Hashed password
+  email     String?
+  role      String   @default("admin")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("admin_users")
+}
+
+// Visitor Analytics
+model Visitor {
+  id          Int      @id @default(autoincrement())
+  ipAddress   String?
+  userAgent   String?
+  page        String
+  referrer    String?
+  country     String?
+  city        String?
+  device      String?
+  browser     String?
+  os          String?
+  visitedAt   DateTime @default(now())
+  
+  @@map("visitors")
+  @@index([visitedAt])
+  @@index([page])
+}
+
+// Analytics and Metrics
+model Analytics {
+  id        Int      @id @default(autoincrement())
+  event     String
+  data      Json?
+  createdAt DateTime @default(now())
+  
+  @@map("analytics")
+}
+
