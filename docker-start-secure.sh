@@ -9,11 +9,29 @@ echo "🐳 Portfolio Website - Secure Docker Start"
 echo "==========================================="
 echo ""
 
-# Check if Docker is running
-if ! docker info > /dev/null 2>&1; then
-    echo "❌ Error: Docker is not running"
-    echo "Please start Docker Desktop and try again"
+# Check if Docker is available
+if ! command -v docker > /dev/null 2>&1; then
+    echo "❌ Error: Docker is not installed"
+    echo "Please install Docker and try again"
+    echo "Visit: https://docs.docker.com/engine/install/"
     exit 1
+fi
+
+# Check if Docker daemon is accessible (works on both Mac and Linux)
+if ! docker ps > /dev/null 2>&1; then
+    # Try with sudo on Linux
+    if sudo docker ps > /dev/null 2>&1; then
+        echo "⚠️  Note: Docker requires sudo on this system"
+        echo "You may want to add your user to the docker group:"
+        echo "  sudo usermod -aG docker \$USER"
+        echo "  Then logout and login again"
+        echo ""
+        USE_SUDO="sudo"
+    else
+        echo "❌ Error: Docker daemon is not running"
+        echo "Please start Docker and try again"
+        exit 1
+    fi
 fi
 
 # Check if .env file exists
@@ -85,13 +103,13 @@ case $choice in
         echo ""
         echo "🚀 Starting development server..."
         echo "=================================="
-        docker compose up app-dev
+        ${USE_SUDO} docker compose up app-dev
         ;;
     2)
         echo ""
         echo "🏭 Building and starting production server..."
         echo "============================================="
-        docker compose up --build app
+        ${USE_SUDO} docker compose up --build app
         ;;
     *)
         echo "❌ Invalid choice. Please run the script again."
