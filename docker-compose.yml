@@ -4,6 +4,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      cache_from:
+        - portfolio-app:latest
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    image: portfolio-app:latest
     container_name: portfolio-app
     restart: unless-stopped
     ports:
@@ -21,6 +26,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+      cache_from:
+        - portfolio-app-dev:latest
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+    image: portfolio-app-dev:latest
     container_name: portfolio-app-dev
     restart: unless-stopped
     ports:

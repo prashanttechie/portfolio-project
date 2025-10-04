@@ -13,9 +13,13 @@
     "create-admin": "ts-node scripts/create-admin.ts",
     "docker:dev": "./docker-start-secure.sh",
     "docker:prod": "./docker-start-secure.sh",
-    "docker:build": "docker compose build",
+    "docker:build": "docker compose build --parallel",
+    "docker:build:prod": "docker compose build app --no-cache",
+    "docker:build:dev": "docker compose build app-dev",
+    "docker:rebuild": "docker compose down && docker image prune -a -f && docker compose build --parallel",
     "docker:stop": "docker compose down",
-    "docker:clean": "docker compose down -v && docker system prune -f"
+    "docker:clean": "docker compose down -v && docker system prune -f",
+    "docker:prune": "docker image prune -a -f && docker builder prune -f"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
