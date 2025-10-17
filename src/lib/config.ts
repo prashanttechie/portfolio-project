@@ -1,10 +1,10 @@
 // Configuration for development and production environments
 
 export const config = {
-  stripe: {
-    publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || 'pk_test_51234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-    secretKey: process.env.STRIPE_SECRET_KEY || 'sk_test_51234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef',
-    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET || 'whsec_1234567890abcdef1234567890abcdef1234567890abcdef',
+  razorpay: {
+    keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_1234567890',
+    keySecret: process.env.RAZORPAY_KEY_SECRET || 'test_secret_key',
+    webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || 'test_webhook_secret',
   },
   email: {
     host: process.env.EMAIL_HOST || 'smtp.gmail.com',
@@ -19,10 +19,15 @@ export const config = {
   },
 };
 
-// Test card numbers for Stripe testing
-export const testCards = {
-  success: '4242424242424242',
-  declined: '4000000000000002',
-  requiresAuth: '4000002500003155',
-  insufficient: '4000000000009995',
+// Test payment methods for Razorpay testing
+export const testPayments = {
+  cards: {
+    success: '4111111111111111',
+    declined: '4000000000000002',
+    requiresAuth: '4000002500003155',
+  },
+  upi: {
+    success: 'success@razorpay',
+    failure: 'failure@razorpay',
+  },
 };
