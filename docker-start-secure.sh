@@ -72,72 +72,24 @@ if [ -z "$DB_PASSWORD" ]; then
 fi
 
 # Display configuration
-echo "Database Configuration:"
+echo "Configuration:"
 echo "  Host: $DB_HOST"
 echo "  Port: 5432"
 echo "  Database: portfolio-data"
 echo "  User: postgres"
 echo ""
 
-# Prompt for Razorpay credentials
-echo "💳 Razorpay Configuration"
-echo "-------------------------"
-echo "(Get keys from: https://dashboard.razorpay.com/app/keys)"
-echo ""
-
-read -p "Enter Razorpay Key ID (e.g., rzp_test_...): " RAZORPAY_KEY_ID
-if [ -z "$RAZORPAY_KEY_ID" ]; then
-    echo "⚠️  Warning: Razorpay Key ID is empty. Payment features will not work."
-fi
-echo ""
-
-read -sp "Enter Razorpay Key Secret: " RAZORPAY_KEY_SECRET
-echo ""
-if [ -z "$RAZORPAY_KEY_SECRET" ]; then
-    echo "⚠️  Warning: Razorpay Key Secret is empty. Payment features will not work."
-fi
-echo ""
-
-read -sp "Enter Razorpay Webhook Secret (optional): " RAZORPAY_WEBHOOK_SECRET
-echo ""
-echo ""
-
-# Display Razorpay configuration
-echo "Razorpay Configuration:"
-echo "  Key ID: ${RAZORPAY_KEY_ID:0:15}..."
-echo "  Key Secret: ********"
-if [ -n "$RAZORPAY_WEBHOOK_SECRET" ]; then
-    echo "  Webhook Secret: ********"
-fi
-echo ""
-
-# Update .env file with all configurations
+# Update .env file with host and password
 echo "📝 Updating .env file..."
 sed -i.bak "s/DB_HOST=.*/DB_HOST=$DB_HOST/" .env
 sed -i.bak "s/DB_PASSWORD=.*/DB_PASSWORD=$DB_PASSWORD/" .env
 rm -f .env.bak
 
-# Create/update .env.local with all configurations
-cat > .env.local << EOF
-# Database Configuration
-DATABASE_URL="postgresql://postgres:${DB_PASSWORD}@${DB_HOST}:5432/portfolio-data?connect_timeout=10&sslmode=prefer"
-
-# Razorpay Configuration
-RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
-RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
-NEXT_PUBLIC_RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
-RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET}
-
-# Application Configuration
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NODE_ENV=development
-EOF
+# Also update .env.local for local development
+echo "DATABASE_URL=\"postgresql://postgres:${DB_PASSWORD}@${DB_HOST}:5432/portfolio-data?connect_timeout=10&sslmode=prefer\"" > .env.local
 
 echo ""
-echo "✅ Configuration saved successfully!"
-echo "   - Database: Connected to $DB_HOST"
-echo "   - Razorpay: ${RAZORPAY_KEY_ID:0:15}..."
-echo "   - Config file: .env.local"
+echo "✅ Database configuration saved successfully!"
 echo ""
 
 # Ask user which mode to run

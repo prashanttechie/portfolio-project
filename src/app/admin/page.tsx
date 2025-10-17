@@ -38,34 +38,6 @@ interface AdminUser {
   updatedAt: string;
 }
 
-interface Payment {
-  id: number;
-  stripePaymentId: string;
-  amount: number;
-  currency: string;
-  status: string;
-  paymentMethod: string | null;
-  receiptUrl: string | null;
-  createdAt: string;
-  enrollment: {
-    name: string;
-    email: string;
-    course: {
-      title: string;
-      price: number;
-    };
-  };
-}
-
-interface PaymentStats {
-  totalRevenue: number;
-  stats: {
-    status: string;
-    _sum: { amount: number | null };
-    _count: { id: number };
-  }[];
-}
-
 interface VisitorStats {
   totalVisitors: number;
   visitorsLast24h: number;
@@ -100,11 +72,9 @@ export default function AdminPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
   const [visitorStats, setVisitorStats] = useState<VisitorStats | null>(null);
-  const [payments, setPayments] = useState<Payment[]>([]);
-  const [paymentStats, setPaymentStats] = useState<PaymentStats | null>(null);
   
   const [, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'blogs' | 'courses' | 'projects' | 'users' | 'visitors' | 'payments'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'blogs' | 'courses' | 'projects' | 'users' | 'visitors'>('dashboard');
 
   // User management modal
   const [showUserModal, setShowUserModal] = useState(false);
@@ -165,7 +135,7 @@ export default function AdminPage() {
 
   const fetchAllData = async () => {
     setLoading(true);
-    await Promise.all([fetchBlogs(), fetchCourses(), fetchProjects(), fetchAdminUsers(), fetchVisitorStats(), fetchPayments()]);
+    await Promise.all([fetchBlogs(), fetchCourses(), fetchProjects(), fetchAdminUsers(), fetchVisitorStats()]);
     setLoading(false);
   };
 
@@ -216,22 +186,6 @@ export default function AdminPage() {
       if (response.ok) setVisitorStats(data);
     } catch (error) {
       console.error('Error fetching visitor stats:', error);
-    }
-  };
-
-  const fetchPayments = async () => {
-    try {
-      const response = await fetch('/api/payments');
-      const data = await response.json();
-      if (response.ok) {
-        setPayments(data.payments || []);
-        setPaymentStats({
-          totalRevenue: data.totalRevenue || 0,
-          stats: data.stats || [],
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching payments:', error);
     }
   };
 
@@ -478,10 +432,10 @@ export default function AdminPage() {
         <div className="bg-white rounded-lg shadow overflow-hidden">
           <div className="border-b border-gray-200">
             <nav className="flex flex-wrap -mb-px">
-              {['dashboard', 'blogs', 'courses', 'projects', 'users', 'visitors', 'payments'].map((tab) => (
+              {['dashboard', 'blogs', 'courses', 'projects', 'users', 'visitors'].map((tab) => (
                 <button
                   key={tab}
-                  onClick={() => setActiveTab(tab as 'dashboard' | 'blogs' | 'courses' | 'projects' | 'users' | 'visitors' | 'payments')}
+                  onClick={() => setActiveTab(tab as 'dashboard' | 'blogs' | 'courses' | 'projects' | 'users' | 'visitors')}
                   className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
                     activeTab === tab
                       ? 'border-blue-600 text-blue-600'
@@ -867,136 +821,6 @@ export default function AdminPage() {
                       </tbody>
                     </table>
                   </div>
-                </div>
-              </div>
-            )}
-
-            {/* Payments Tab */}
-            {activeTab === 'payments' && (
-              <div className="p-6">
-                {/* Payment Statistics */}
-                {paymentStats && (
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-lg shadow-lg">
-                      <h3 className="text-sm font-medium mb-2 opacity-90">Total Revenue</h3>
-                      <p className="text-3xl font-bold">${paymentStats.totalRevenue.toFixed(2)}</p>
-                    </div>
-                    {paymentStats.stats.map((stat) => (
-                      <div key={stat.status} className={`p-6 rounded-lg shadow-lg text-white ${
-                        stat.status === 'COMPLETED' ? 'bg-gradient-to-br from-blue-500 to-blue-600' :
-                        stat.status === 'PENDING' ? 'bg-gradient-to-br from-yellow-500 to-yellow-600' :
-                        stat.status === 'FAILED' ? 'bg-gradient-to-br from-red-500 to-red-600' :
-                        'bg-gradient-to-br from-gray-500 to-gray-600'
-                      }`}>
-                        <h3 className="text-sm font-medium mb-2 opacity-90">{stat.status}</h3>
-                        <p className="text-3xl font-bold">{stat._count.id}</p>
-                        <p className="text-sm mt-1 opacity-90">
-                          ${(stat._sum.amount || 0).toFixed(2)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Payments Table */}
-                <div className="bg-white rounded-lg shadow overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900">Recent Payments</h3>
-                  </div>
-                  {payments.length === 0 ? (
-                    <div className="p-8 text-center text-gray-500">
-                      No payments yet
-                    </div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Student
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Course
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Amount
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Status
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Payment Method
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Date
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Receipt
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
-                          {payments.map((payment) => (
-                            <tr key={payment.id} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div>
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {payment.enrollment.name}
-                                  </div>
-                                  <div className="text-sm text-gray-500">
-                                    {payment.enrollment.email}
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-6 py-4">
-                                <div className="text-sm text-gray-900">
-                                  {payment.enrollment.course.title}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div className="text-sm font-semibold text-gray-900">
-                                  ${payment.amount.toFixed(2)}
-                                </div>
-                                <div className="text-xs text-gray-500 uppercase">
-                                  {payment.currency}
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                  payment.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                                  payment.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                                  payment.status === 'FAILED' ? 'bg-red-100 text-red-800' :
-                                  'bg-gray-100 text-gray-800'
-                                }`}>
-                                  {payment.status}
-                                </span>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {payment.paymentMethod || 'N/A'}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {new Date(payment.createdAt).toLocaleDateString()}
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                {payment.receiptUrl ? (
-                                  <a
-                                    href={payment.receiptUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:text-blue-900"
-                                  >
-                                    View
-                                  </a>
-                                ) : (
-                                  <span className="text-gray-400">N/A</span>
-                                )}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
                 </div>
               </div>
             )}

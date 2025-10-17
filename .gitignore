@@ -64,4 +64,3 @@ scripts/*.js
 *.temp
 .cache/
 ssh-secret
-rzp.csv

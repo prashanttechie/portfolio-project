@@ -37,13 +37,11 @@ export async function POST(request: NextRequest) {
     });
 
     // Set session cookie
-    // Note: secure flag requires HTTPS. Set to false if using HTTP in production.
     response.cookies.set('admin_session', sessionToken, {
       httpOnly: true,
-      secure: false, // Set to true only if using HTTPS
+      secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24, // 24 hours
-      path: '/',
     });
 
     return response;
