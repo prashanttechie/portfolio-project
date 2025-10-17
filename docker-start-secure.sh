@@ -140,11 +140,31 @@ echo "   - Razorpay: ${RAZORPAY_KEY_ID:0:15}..."
 echo "   - Config file: .env.local"
 echo ""
 
+# Create .env.production file for server deployment
+cat > .env.production << EOF
+# Database Configuration
+DATABASE_URL="postgresql://postgres:${DB_PASSWORD}@${DB_HOST}:5432/portfolio-data?connect_timeout=10&sslmode=prefer"
+
+# Razorpay Configuration
+RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
+RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET}
+NEXT_PUBLIC_RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID}
+RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET}
+
+# Application Configuration
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+NODE_ENV=production
+EOF
+
+echo "✅ .env.production created for server deployment"
+echo ""
+
 # Ask user which mode to run
 echo "Select mode:"
 echo "1) Development (with hot reload)"
 echo "2) Production (optimized build)"
-read -p "Enter choice (1 or 2): " choice
+echo "3) Deploy to server (builds and uploads)"
+read -p "Enter choice (1, 2, or 3): " choice
 
 case $choice in
     1)
@@ -158,6 +178,93 @@ case $choice in
         echo "🏭 Building and starting production server..."
         echo "============================================="
         ${USE_SUDO} docker compose up --build app
+        ;;
+    3)
+        echo ""
+        echo "🌐 Deploy to Server"
+        echo "==================="
+        read -p "Enter server address (e.g., 210.79.128.171): " SERVER_IP
+        read -p "Enter server user (default: ubuntu): " SERVER_USER
+        SERVER_USER=${SERVER_USER:-ubuntu}
+        read -p "Enter SSH key path (default: ssh-secret/ai-experiment): " SSH_KEY
+        SSH_KEY=${SSH_KEY:-ssh-secret/ai-experiment}
+        
+        echo ""
+        echo "📤 Uploading files to server..."
+        
+        # Upload .env.production
+        scp -i "$SSH_KEY" .env.production "${SERVER_USER}@${SERVER_IP}:~/portfolio-project/" || {
+            echo "❌ Failed to upload .env.production"
+            echo "Creating remote directory and retrying..."
+            ssh -i "$SSH_KEY" "${SERVER_USER}@${SERVER_IP}" "mkdir -p ~/portfolio-project"
+            scp -i "$SSH_KEY" .env.production "${SERVER_USER}@${SERVER_IP}:~/portfolio-project/"
+        }
+        
+        # Upload docker-compose.yml
+        scp -i "$SSH_KEY" docker-compose.yml "${SERVER_USER}@${SERVER_IP}:~/portfolio-project/"
+        
+        # Sync entire project (excluding large directories)
+        echo "📦 Syncing project files..."
+        rsync -avz --progress \
+            --exclude 'node_modules' \
+            --exclude '.next' \
+            --exclude '.git' \
+            --exclude '*.log' \
+            --exclude '.env.local' \
+            -e "ssh -i $SSH_KEY" \
+            ./ "${SERVER_USER}@${SERVER_IP}:~/portfolio-project/" || {
+            echo "⚠️  Rsync not available, using tar method..."
+            tar czf - --exclude='node_modules' --exclude='.next' --exclude='.git' . | \
+            ssh -i "$SSH_KEY" "${SERVER_USER}@${SERVER_IP}" "cd ~/portfolio-project && tar xzf -"
+        }
+        
+        echo ""
+        echo "🐳 Deploying on server..."
+        ssh -i "$SSH_KEY" "${SERVER_USER}@${SERVER_IP}" << 'ENDSSH'
+cd ~/portfolio-project
+
+echo "🛑 Stopping current containers..."
+docker compose down 2>/dev/null || true
+
+echo "🧹 Cleaning old images..."
+docker image prune -f
+
+echo "🏗️  Building production image..."
+docker compose build app
+
+echo "🚀 Starting production server..."
+docker compose up -d app
+
+echo "⏳ Waiting for app to start..."
+sleep 5
+
+echo "✅ Checking status..."
+docker ps | grep portfolio
+
+echo ""
+echo "📊 Recent logs:"
+docker logs portfolio-app --tail=20
+
+echo ""
+echo "🔍 Verifying environment variables..."
+docker exec portfolio-app env | grep -E '(DATABASE|RAZORPAY)' | sed 's/=.*/=***/'
+
+ENDSSH
+        
+        echo ""
+        echo "✅ Deployment complete!"
+        echo ""
+        echo "🌐 Your app should be accessible at:"
+        echo "   http://${SERVER_IP}:3000"
+        if [ "$DB_HOST" != "localhost" ] && [ "$DB_HOST" != "127.0.0.1" ]; then
+            echo "   or http://pkmai.duckdns.org (if DNS is configured)"
+        fi
+        echo ""
+        echo "📊 View logs:"
+        echo "   ssh -i $SSH_KEY ${SERVER_USER}@${SERVER_IP} 'docker logs portfolio-app -f'"
+        echo ""
+        echo "🔄 Restart app:"
+        echo "   ssh -i $SSH_KEY ${SERVER_USER}@${SERVER_IP} 'cd ~/portfolio-project && docker compose restart app'"
         ;;
     *)
         echo "❌ Invalid choice. Please run the script again."
