@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Clock, Users, Play, Award, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import EnrollmentModal from '@/components/EnrollmentModal';
 
 interface CourseCurriculumItem {
   id: number;
@@ -33,6 +34,7 @@ export default function CourseDetail({ params }: CourseDetailProps) {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const loadCourse = async () => {
@@ -130,13 +132,26 @@ export default function CourseDetail({ params }: CourseDetailProps) {
             </span>
           </div>
 
-          <Link
-            href="/#contact"
+          <button
+            onClick={() => setIsModalOpen(true)}
             className="inline-block bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors duration-200 shadow-lg"
           >
-            Contact to Enroll
-          </Link>
+            Enroll Now - Pay ₹{course.price.toLocaleString('en-IN')}
+          </button>
         </div>
+
+        {/* Enrollment Modal */}
+        {course && (
+          <EnrollmentModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            course={{
+              id: course.id,
+              title: course.title,
+              price: course.price,
+            }}
+          />
+        )}
 
         {/* Course Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
